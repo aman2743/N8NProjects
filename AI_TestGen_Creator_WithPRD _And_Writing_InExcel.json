@@ -1,0 +1,304 @@
+{
+  "name": "AI_TestGen_Creator_WithPRD _And_Writing_InExcel",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -672,
+        -192
+      ],
+      "id": "c347bdde-9448-4099-820a-fbb009bec718",
+      "name": "When chat message received",
+      "webhookId": "e005efdb-9aeb-4b54-9eb5-dcf846fec1d0"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "Before generating any test cases:\n\n1. You MUST call the PRD_DOC tool to retrieve the Product Requirement Document.\n2. You MUST use the field response.content from the tool output.\n3. If the tool is not called, do not generate test cases.\n\nYou are a **Senior QA Engineer with 15+ years of experience in Manual and Functional Testing**.\n\nWhen a user asks a query (for example: *“Generate test cases for app.bw.com for Jira ID VWO-123”*), you must strictly follow the process below.\n\n---\n\n## 🔎 Step 1: Read All Source Documents\n\n1. Access and read the **PRD_DOC** from the attached Google Docs tool.\n2. Access and read the **VWO-26** using the Jira tool.\n\nYou must extract:\n\n* Functional requirements\n* Acceptance criteria\n* Business rules\n* Validations\n* Constraints\n* Dependencies\n\n⚠️ Use ONLY the information present in these tools.\nDo NOT assume, infer, or hallucinate any details.\n\n---\n\n## 🧠 Step 2: Analyze Before Writing\n\n* Cross-reference PRD and Jira.\n* Identify scenarios directly supported by documented requirements.\n* If information is missing, explicitly mention:\n\n> \"Insufficient information available in PRD or Jira to create this test case.\"\n\nDo NOT create assumptions.\n\n---\n\n## 🧪 Step 3: Generate High-Quality Manual Test Cases\n\nYou must ensure coverage of:\n\n* Positive scenarios\n* Negative scenarios\n* Boundary/validation scenarios (if mentioned)\n* Error handling scenarios (if documented)\n* UI validations (if described)\n\nOnly generate scenarios explicitly supported by PRD and  Jira.\n\n---\n\n# 📄 Mandatory Output Format (Tabular – Jira Compatible)\n\nYou must present test cases in the following **tabular format**:\n\n| Test Case ID | Test Case Title | Jira ID | Requirement Reference | Preconditions | Test Steps | Test Data | Expected Result | Priority | Test Type |\n| ------------ | --------------- | ------- | --------------------- | ------------- | ---------- | --------- | --------------- | -------- | --------- |\n\n### Column Guidelines:\n\n* **Test Case ID** → Unique identifier (TC_001, TC_002, etc.)\n* **Test Case Title** → Clear and concise description\n* **Jira ID** → Provided Jira ticket number\n* **Requirement Reference** → PRD section or Jira Acceptance Criteria reference\n* **Preconditions** → System state before execution\n* **Test Steps** → Numbered step-by-step execution steps\n* **Test Data** → Input values (if applicable)\n* **Expected Result** → Clearly measurable outcome\n* **Priority** → High / Medium / Low (based strictly on requirement criticality)\n* **Test Type** → Functional / Negative / Boundary / Validation / Regression (based on scenario type)\n\n---\n\n## 🚫 Strict Rules\n\n* Do NOT hallucinate.\n* Do NOT create features not present in PRD or Jira.\n* Do NOT combine unrelated requirements.\n* Do NOT skip validation scenarios if documented.\n* If ambiguity exists, clearly mention it instead of assuming.\n\n---\n\n## 🎯 Output Requirements\n\nYour final output must be:\n\n* Structured\n* Professional\n* Clear\n* Ready to paste into Jira\n* Strictly based on documented evidence\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -384,
+        -256
+      ],
+      "id": "96ba971f-bb27-4f0b-85b2-db5ceaddaa3b",
+      "name": "AI Agent",
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-20b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -528,
+        -32
+      ],
+      "id": "78a5a6e4-c414-4ca0-a930-b38e51a33d33",
+      "name": "Groq_Brain",
+      "credentials": {
+        "groqApi": {
+          "id": "9S11gaig0AhAhspy",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "issueKey": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Issue_Key', ``, 'string') }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.jiraTool",
+      "typeVersion": 1,
+      "position": [
+        -336,
+        -16
+      ],
+      "id": "0faafc46-1379-4a1b-9fa6-5823f2b912e6",
+      "name": "Get an issue in Jira Software",
+      "credentials": {
+        "jiraSoftwareCloudApi": {
+          "id": "m5NKP0noENzhDMzf",
+          "name": "Jira SW Cloud account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "documentURL": "https://docs.google.com/document/d/1zxHjAdBxdpdTPDVqwMcQAfWy9yMKoUeIKpFJDAbK_k0/edit?usp=sharing",
+        "simple": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Simplify', `This tool retrieves the full Product Requirement Document (PRD).\nYou MUST call this tool before generating any test cases.\nThe PRD content will be returned in the field: response.content.`, 'boolean') }}"
+      },
+      "type": "n8n-nodes-base.googleDocsTool",
+      "typeVersion": 2,
+      "position": [
+        -160,
+        0
+      ],
+      "id": "696989be-6215-4a4a-bc6b-c85b87a04b59",
+      "name": "PRD_DOC",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "xgxwHUTNqHsFx3mP",
+          "name": "Google Docs account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1xG1EP0EVe1TqYvghubuLB2O0QsAOWHvEhTWX6mNTkRY/edit?usp=sharing",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1xG1EP0EVe1TqYvghubuLB2O0QsAOWHvEhTWX6mNTkRY/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Test Case ID": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Test_Case_ID__using_to_match_', ``, 'string') }}",
+            "Test Case Title": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Test_Case_Title', ``, 'string') }}",
+            "Requirement Reference": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Requirement_Reference', ``, 'string') }}",
+            "Preconditions": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Preconditions', ``, 'string') }}",
+            "Test Steps": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Test_Steps', ``, 'string') }}",
+            "Test Type": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Test_Type', ``, 'string') }}",
+            "Priority": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Priority', ``, 'string') }}",
+            "Expected Result": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Expected_Result', ``, 'string') }}",
+            "Test Data": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Test_Data', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "Test Case ID"
+          ],
+          "schema": [
+            {
+              "id": "Test Case ID",
+              "displayName": "Test Case ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Test Case Title",
+              "displayName": "Test Case Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Requirement Reference",
+              "displayName": "Requirement Reference",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Preconditions",
+              "displayName": "Preconditions",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Test Steps",
+              "displayName": "Test Steps",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Test Data",
+              "displayName": "Test Data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Expected Result",
+              "displayName": "Expected Result",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Priority",
+              "displayName": "Priority",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Test Type",
+              "displayName": "Test Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        32,
+        -64
+      ],
+      "id": "92508afd-49e7-4e22-8e80-03e6a08ebf1f",
+      "name": "TestCasesUpdate_N8N",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "zbuaRrVWjKKnBD7e",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq_Brain": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get an issue in Jira Software": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PRD_DOC": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TestCasesUpdate_N8N": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "a91d3439-54b5-4bd8-89d2-362272f7e7a2",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c4e67f40564af320fe1075445657cd345c1390dfe63fee237974fcf288f499ff"
+  },
+  "id": "jXCze6Q8hJmzEyxa",
+  "tags": []
+}
