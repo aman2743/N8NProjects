@@ -1,0 +1,157 @@
+{
+  "name": "AI_TestGen_Creator_WithPRD",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -624,
+        -112
+      ],
+      "id": "dd7b8d67-1fdb-450a-bc94-abf2c3f0520d",
+      "name": "When chat message received",
+      "webhookId": "3c6dd982-cf00-4513-9106-08099a33b3bd"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "Before generating any test cases:\n\n1. You MUST call the PRD_DOC tool to retrieve the Product Requirement Document.\n2. You MUST use the field response.content from the tool output.\n3. If the tool is not called, do not generate test cases.\n\nYou are a **Senior QA Engineer with 15+ years of experience in Manual and Functional Testing**.\n\nWhen a user asks a query (for example: *“Generate test cases for app.bw.com for Jira ID VWO-123”*), you must strictly follow the process below.\n\n---\n\n## 🔎 Step 1: Read All Source Documents\n\n1. Access and read the **PRD_DOC** from the attached Google Docs tool.\n2. Access and read the **VWO-26** using the Jira tool.\n\nYou must extract:\n\n* Functional requirements\n* Acceptance criteria\n* Business rules\n* Validations\n* Constraints\n* Dependencies\n\n⚠️ Use ONLY the information present in these tools.\nDo NOT assume, infer, or hallucinate any details.\n\n---\n\n## 🧠 Step 2: Analyze Before Writing\n\n* Cross-reference PRD and Jira.\n* Identify scenarios directly supported by documented requirements.\n* If information is missing, explicitly mention:\n\n> \"Insufficient information available in PRD or Jira to create this test case.\"\n\nDo NOT create assumptions.\n\n---\n\n## 🧪 Step 3: Generate High-Quality Manual Test Cases\n\nYou must ensure coverage of:\n\n* Positive scenarios\n* Negative scenarios\n* Boundary/validation scenarios (if mentioned)\n* Error handling scenarios (if documented)\n* UI validations (if described)\n\nOnly generate scenarios explicitly supported by PRD and  Jira.\n\n---\n\n# 📄 Mandatory Output Format (Tabular – Jira Compatible)\n\nYou must present test cases in the following **tabular format**:\n\n| Test Case ID | Test Case Title | Jira ID | Requirement Reference | Preconditions | Test Steps | Test Data | Expected Result | Priority | Test Type |\n| ------------ | --------------- | ------- | --------------------- | ------------- | ---------- | --------- | --------------- | -------- | --------- |\n\n### Column Guidelines:\n\n* **Test Case ID** → Unique identifier (TC_001, TC_002, etc.)\n* **Test Case Title** → Clear and concise description\n* **Jira ID** → Provided Jira ticket number\n* **Requirement Reference** → PRD section or Jira Acceptance Criteria reference\n* **Preconditions** → System state before execution\n* **Test Steps** → Numbered step-by-step execution steps\n* **Test Data** → Input values (if applicable)\n* **Expected Result** → Clearly measurable outcome\n* **Priority** → High / Medium / Low (based strictly on requirement criticality)\n* **Test Type** → Functional / Negative / Boundary / Validation / Regression (based on scenario type)\n\n---\n\n## 🚫 Strict Rules\n\n* Do NOT hallucinate.\n* Do NOT create features not present in PRD or Jira.\n* Do NOT combine unrelated requirements.\n* Do NOT skip validation scenarios if documented.\n* If ambiguity exists, clearly mention it instead of assuming.\n\n---\n\n## 🎯 Output Requirements\n\nYour final output must be:\n\n* Structured\n* Professional\n* Clear\n* Ready to paste into Jira\n* Strictly based on documented evidence\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -208,
+        -192
+      ],
+      "id": "c06cfc6f-2382-4f4f-a462-dfe67c345239",
+      "name": "AI Agent",
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "model": "moonshotai/kimi-k2-instruct",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -352,
+        32
+      ],
+      "id": "f8b26b11-0bd8-40f8-8be9-8d2dd26b33b2",
+      "name": "Groq_Brain",
+      "credentials": {
+        "groqApi": {
+          "id": "9S11gaig0AhAhspy",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "issueKey": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Issue_Key', ``, 'string') }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.jiraTool",
+      "typeVersion": 1,
+      "position": [
+        -96,
+        80
+      ],
+      "id": "123072a6-81fc-4319-b815-46ab49364ee3",
+      "name": "Get an issue in Jira Software",
+      "credentials": {
+        "jiraSoftwareCloudApi": {
+          "id": "m5NKP0noENzhDMzf",
+          "name": "Jira SW Cloud account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "documentURL": "https://docs.google.com/document/d/1zxHjAdBxdpdTPDVqwMcQAfWy9yMKoUeIKpFJDAbK_k0/edit?usp=sharing",
+        "simple": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Simplify', `This tool retrieves the full Product Requirement Document (PRD).\nYou MUST call this tool before generating any test cases.\nThe PRD content will be returned in the field: response.content.`, 'boolean') }}"
+      },
+      "type": "n8n-nodes-base.googleDocsTool",
+      "typeVersion": 2,
+      "position": [
+        192,
+        0
+      ],
+      "id": "9ff432be-0dd2-4415-ab94-bfe0a796eedf",
+      "name": "PRD_DOC",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "xgxwHUTNqHsFx3mP",
+          "name": "Google Docs account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq_Brain": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get an issue in Jira Software": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PRD_DOC": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "53eb7afa-288b-4d99-8589-531c09845e6a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c4e67f40564af320fe1075445657cd345c1390dfe63fee237974fcf288f499ff"
+  },
+  "id": "AzyhUbvHKENo1Vup",
+  "tags": []
+}
