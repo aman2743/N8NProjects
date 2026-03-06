@@ -1,0 +1,266 @@
+{
+  "name": "ContentCreatorAndPostToLinkedIn",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -560,
+        -16
+      ],
+      "id": "2dfb2fe8-2287-4a55-8b4e-0fcd343b49cb",
+      "name": "When chat message received",
+      "webhookId": "a169f580-294c-4a26-b4eb-983d3d400665"
+    },
+    {
+      "parameters": {
+        "content": "## Topic Generator\n**User will provide the prompt and AI will generate the topic",
+        "height": 400,
+        "width": 416
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -368,
+        -112
+      ],
+      "typeVersion": 1,
+      "id": "7fe4ae32-c70c-46e8-96a8-035fd24b9a76",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.1-flash-lite-preview",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -352,
+        160
+      ],
+      "id": "e6d44233-a4f2-4c01-b898-4020740fbedb",
+      "name": "Gemini Brain",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SvisfY9gL0kt0n1n",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "\n[\n  {\n\t\"Title\": \"AI is coming for QA Jobs\",\n\t\"Rationale\": \"Why you think this post should exists\",\n    \"Hook\": \"2026 is the end of QA\"\n}\n]"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -128,
+        176
+      ],
+      "id": "0d587200-f697-4714-9317-c02ba1380869",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "You are a senior QA architect and industry analyst writing in 2026.\n\nYour task is to generate ONLY ONE topic about:\n\n\"Software Testing in 2026\"\n\nConstraints:\n- Choose the single most impactful and future-defining shift.\n- Avoid generic themes unless you provide a deeply unique angle.\n- The topic must be bold, specific, and insight-driven.\n- It should reflect a real structural change in the industry (not surface-level trends)\n- The topic must be strong enough to anchor a keynote talk.\n\nOutput format:\n\n1. Title (clear, bold, thought-provoking)\n2. One-sentence thesis (strong and definitive)\n3. Why this topic matters in 2026 (5–7 bullet points with reasoning)\n\nDo NOT generate multiple topics.\nDo NOT provide alternatives.\nCommit to one topic and defend it.",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -288,
+        -32
+      ],
+      "id": "021d780b-9e34-4c6a-b678-b46cb38bd503",
+      "name": "Topic Creator Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.1-flash-lite-preview",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        128,
+        160
+      ],
+      "id": "c1e881ea-ac33-48cd-a8aa-6193b269f89c",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "nrxmYIKotwJY8SCS",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Create a LinkedIn post based on topic created\n**Generate the content based on the topic",
+        "height": 400,
+        "width": 480
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        96,
+        -112
+      ],
+      "typeVersion": 1,
+      "id": "7ed8abc3-ee64-4074-8bcd-6066cebeb85e",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"Post Title\": \"Exciting new feature launch\",\n\t\"Post Content\": \"After month of collaboration, testing and fine tunning,  we are thrilled to announce our new feature\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        448,
+        128
+      ],
+      "id": "9097dc6f-8897-42e6-b53d-a0fbd2031403",
+      "name": "Structured Output Parser1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a high-performing LinkedIn content strategist and B2B copywriter.\n\nInput:\n\n- Title: {{ $json.output[0].Title }}\n- Rationale: {{ $json.output[0].Rationale }}\n- Suggested Hook: {{ $json.output[0].Hook }}\nYour task:\nCreate a high-engagement LinkedIn post based on the inputs.\n\nRequirements:\n\n1. Start with the provided hook (optimize it if necessary for stronger scroll-stopping impact).\n2. Expand the core idea clearly and persuasively.\n3. Maintain a strong narrative flow (problem → shift → insight → implication).\n4. Keep it practical and insight-driven (no fluff or generic motivation).\n5. Use short paragraphs for readability.\n6. Include 3–5 sharp bullet points if helpful.\n7. End with:\n    - A strong takeaway or forward-looking statement\n    - A conversation-driving question\n\nTone:\n\n- Authoritative but conversational\n- Insightful and slightly bold\n- Written for professionals in tech/QA/engineering leadership\nLength:\n\n- 150–300 words\nAfter the post, also provide:\n\nImage Suggestion:\n\n- Describe a visually striking, professional image concept\n- Include composition details (foreground, background, objects, mood)\n- Make it suitable for LinkedIn (clean, modern, minimal)\n- The image should reinforce the main message of the post\n",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        192,
+        -32
+      ],
+      "id": "0afe227e-e957-44c2-8d74-acee121d5754",
+      "name": "Content Creator - AI Agent"
+    },
+    {
+      "parameters": {
+        "operation": "uploadText",
+        "user": "amankumar",
+        "platform": [
+          "linkedin"
+        ],
+        "title": "={{ $json.output['Post Title'] }}",
+        "linkedinTitle": "={{ $json.output['Post Content'] }}",
+        "targetLinkedinPageId": "me"
+      },
+      "type": "n8n-nodes-upload-post.uploadPost",
+      "typeVersion": 1,
+      "position": [
+        624,
+        0
+      ],
+      "id": "c179fa3b-5c54-40c1-a6f9-b9efe900f4a9",
+      "name": "Upload a text post",
+      "credentials": {
+        "uploadPostApi": {
+          "id": "QHHlvxY660zkyKTL",
+          "name": "Upload Post account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Topic Creator Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Brain": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Topic Creator Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Topic Creator Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Topic Creator Agent": {
+      "main": [
+        [
+          {
+            "node": "Content Creator - AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Content Creator - AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Content Creator - AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Content Creator - AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Upload a text post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "f592892d-bb35-4434-9cea-bfebe482875f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c61385e373672c08de7f46154f360d7aba43ab028ee4fbbbd33da1bcc8eeef29"
+  },
+  "id": "9DZt0gAuhCnSQp4g",
+  "tags": []
+}
